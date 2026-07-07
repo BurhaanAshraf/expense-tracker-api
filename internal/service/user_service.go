@@ -11,11 +11,16 @@ import (
 
 type UserService struct {
 	userRepository *repository.UserRepository
+	jwtSecret      string
 }
 
-func NewUserService(userRepository *repository.UserRepository) *UserService {
+func NewUserService(
+	userRepository *repository.UserRepository,
+	jwtSecret string,
+) *UserService {
 	return &UserService{
 		userRepository: userRepository,
+		jwtSecret:      jwtSecret,
 	}
 }
 
@@ -45,7 +50,12 @@ func (s *UserService) Register(ctx context.Context, name, email, password string
 	return user, nil
 }
 
-func (s *UserService) Login(ctx context.Context, email, password string, secret string) (string, error) {
+func (s *UserService) Login(
+	ctx context.Context,
+	email,
+	password,
+	secret string,
+) (string, error) {
 	user, err := s.userRepository.FindByEmail(ctx, email)
 	if err != nil {
 		return "", errors.New("invalid email or password")
@@ -56,10 +66,7 @@ func (s *UserService) Login(ctx context.Context, email, password string, secret 
 		return "", errors.New("invalid email or password")
 	}
 
-	token, err := auth.GenerateToken(user.ID, secret)
-	if err != nil {
-		return "", err
-	}
+	token, err := auth.GenerateToken(user.ID, s.jwtSecret)
 
 	return token, nil
 }
