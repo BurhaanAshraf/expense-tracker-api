@@ -261,10 +261,9 @@ GET /expenses?category=Food&page=1&limit=5&sort=amount_desc
 
 ---
 
-
 ## Live Demo
 
-Deployment link will be added after deployment.
+https://expense-tracker-api-g3c4.onrender.com
 
 ---
 
