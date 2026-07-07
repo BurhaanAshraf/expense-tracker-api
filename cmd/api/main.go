@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -49,6 +50,29 @@ func main() {
 	mux.Handle("DELETE /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.Delete)))
 	mux.Handle("GET /dashboard", jwtMiddlware(http.HandlerFunc(expenseHandler.Dashboard)))
 	mux.Handle("GET /dashboard/categories", jwtMiddlware(http.HandlerFunc(expenseHandler.CategorySummary)))
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		err := json.NewEncoder(w).Encode(map[string]any{
+			"name":    "Expense Tracker API",
+			"version": "1.0.0",
+			"status":  "running",
+			"endpoints": []string{
+				"/health",
+				"/register",
+				"/login",
+				"/expenses",
+				"/dashboard",
+				"/dashboard/categories",
+			},
+			"github": "https://github.com/BurhaanAshraf/expense-tracker-api",
+		})
+
+		if err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		}
+	})
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
