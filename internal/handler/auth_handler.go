@@ -8,6 +8,7 @@ import (
 	"github.com/BurhaanAshraf/finance-api/internal/model"
 	"github.com/BurhaanAshraf/finance-api/internal/response"
 	service "github.com/BurhaanAshraf/finance-api/internal/service"
+	"github.com/BurhaanAshraf/finance-api/internal/validation"
 )
 
 type AuthHandler struct {
@@ -26,6 +27,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		response.BadRequest(w, "Invalid request body")
+		return
+	}
+	err = validation.ValidateRegister(req)
+	if err != nil {
+		response.BadRequest(w, err.Error())
 		return
 	}
 
@@ -55,6 +61,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		response.BadRequest(w, "Invalid request body")
+		return
+	}
+	err = validation.ValidateLogin(req)
+	if err != nil {
+		response.BadRequest(w, err.Error())
 		return
 	}
 

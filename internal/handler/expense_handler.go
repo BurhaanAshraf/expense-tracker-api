@@ -9,6 +9,7 @@ import (
 	"github.com/BurhaanAshraf/finance-api/internal/middleware"
 	"github.com/BurhaanAshraf/finance-api/internal/response"
 	"github.com/BurhaanAshraf/finance-api/internal/service"
+	"github.com/BurhaanAshraf/finance-api/internal/validation"
 )
 
 type ExpenseHandler struct {
@@ -27,6 +28,11 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		response.BadRequest(w, "Invalid request body")
+		return
+	}
+	err = validation.ValidateExpense(req)
+	if err != nil {
+		response.BadRequest(w, err.Error())
 		return
 	}
 
@@ -127,6 +133,11 @@ func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		response.BadRequest(w, "Invalid request body")
+		return
+	}
+	err = validation.ValidateExpense(req)
+	if err != nil {
+		response.BadRequest(w, err.Error())
 		return
 	}
 
