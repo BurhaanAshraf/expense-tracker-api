@@ -48,3 +48,60 @@ func (s *ExpenseService) Create(
 
 	return expense, nil
 }
+func (s *ExpenseService) GetAll(
+	ctx context.Context,
+	userID int64,
+) ([]model.Expense, error) {
+	return s.expenseRepository.GetAllByUserID(ctx, userID)
+}
+func (s *ExpenseService) GetByID(
+	ctx context.Context,
+	userID int64,
+	expenseID int64,
+) (*model.Expense, error) {
+	return s.expenseRepository.GetByID(
+		ctx,
+		userID,
+		expenseID,
+	)
+}
+func (s *ExpenseService) Update(
+	ctx context.Context,
+	userID int64,
+	expenseID int64,
+	title string,
+	amount float64,
+	category string,
+	expenseDate string,
+	notes string,
+) error {
+
+	date, err := ParseDate(expenseDate)
+	if err != nil {
+		return err
+	}
+
+	expense := &model.Expense{
+		ID:          expenseID,
+		UserID:      userID,
+		Title:       title,
+		Amount:      amount,
+		Category:    category,
+		ExpenseDate: date,
+		Notes:       notes,
+	}
+
+	return s.expenseRepository.Update(ctx, expense)
+}
+func (s *ExpenseService) Delete(
+	ctx context.Context,
+	userID int64,
+	expenseID int64,
+) error {
+
+	return s.expenseRepository.Delete(
+		ctx,
+		userID,
+		expenseID,
+	)
+}

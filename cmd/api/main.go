@@ -37,6 +37,10 @@ func main() {
 	mux.HandleFunc("POST /login", authHandler.Login)
 	mux.Handle("GET /me", jwtMiddlware(http.HandlerFunc(handler.Me)))
 	mux.Handle("POST /expenses", jwtMiddlware(http.HandlerFunc(expenseHandler.Create)))
+	mux.Handle("GET /expenses", jwtMiddlware(http.HandlerFunc(expenseHandler.GetAll)))
+	mux.Handle("GET /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.GetByID)))
+	mux.Handle("PUT /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.Update)))
+	mux.Handle("DELETE /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.Delete)))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
