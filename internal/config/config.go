@@ -23,12 +23,17 @@ type Config struct {
 func Load() *Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("failed to load .env file")
+		log.Println(".env file not found, using environment variables")
+	}
+
+	appPort := os.Getenv("PORT")
+	if appPort == "" {
+		appPort = os.Getenv("APP_PORT")
 	}
 
 	return &Config{
 		AppName: os.Getenv("APP_NAME"),
-		AppPort: os.Getenv("APP_PORT"),
+		AppPort: appPort,
 
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
