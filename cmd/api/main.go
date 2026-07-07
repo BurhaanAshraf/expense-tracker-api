@@ -32,6 +32,7 @@ func main() {
 	expenseHandler := handler.NewExpenseHandler(expenseService)
 
 	mux := http.NewServeMux()
+	loggingMiddleware := middleware.LoggingMiddleware
 	mux.HandleFunc("GET /health", handler.HealthHandler)
 	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
@@ -46,7 +47,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
-		Handler: mux,
+		Handler: loggingMiddleware(mux),
 	}
 
 	log.Printf("%s started on http://localhost:%s", cfg.AppName, cfg.AppPort)
