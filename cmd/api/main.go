@@ -7,6 +7,7 @@ import (
 	"github.com/BurhaanAshraf/finance-api/internal/config"
 	"github.com/BurhaanAshraf/finance-api/internal/database"
 	"github.com/BurhaanAshraf/finance-api/internal/handler"
+	"github.com/BurhaanAshraf/finance-api/internal/middleware"
 	"github.com/BurhaanAshraf/finance-api/internal/repository"
 	service "github.com/BurhaanAshraf/finance-api/internal/service"
 )
@@ -14,6 +15,7 @@ import (
 func main() {
 
 	cfg := config.Load()
+	jwtMiddlware := middleware.JWTMiddleware(cfg.JWTSecret)
 
 	db, err := database.Connect(cfg)
 	if err != nil {
@@ -29,6 +31,7 @@ func main() {
 	mux.HandleFunc("GET /health", handler.HealthHandler)
 	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
+	mux.Handle("GET /me", jwtMiddlware(http.HandlerFunc(handler.Me)))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
