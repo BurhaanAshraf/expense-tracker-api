@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/BurhaanAshraf/finance-api/internal/config"
+	"github.com/BurhaanAshraf/finance-api/internal/dto"
 	"github.com/BurhaanAshraf/finance-api/internal/model"
+	"github.com/BurhaanAshraf/finance-api/internal/response"
 	service "github.com/BurhaanAshraf/finance-api/internal/service"
 )
 
@@ -19,23 +20,12 @@ func NewAuthHandler(userService *service.UserService) *AuthHandler {
 	}
 }
 
-type RegisterRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+	var req dto.RegisterRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid request body")
 		return
 	}
 
@@ -47,27 +37,24 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	response := model.UserResponse{
+	userResponse := model.UserResponse{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
 	}
 
-	json.NewEncoder(w).Encode(response)
+	response.Created(w, userResponse)
 }
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req LoginRequest
+	var req dto.LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid request body")
 		return
 	}
 
@@ -75,20 +62,14 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		r.Context(),
 		req.Email,
 		req.Password,
-		config.Load().JWTSecret,
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		response.Unauthorized(w, err.Error())
 		return
 	}
 
-	response := map[string]string{
-		"token": token,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(response)
+	response.OK(w, dto.LoginResponse{
+		Token: token,
+	})
 }

@@ -198,3 +198,78 @@ func (r *ExpenseRepository) Delete(
 
 	return err
 }
+func (r *ExpenseRepository) Dashboard(
+	ctx context.Context,
+	userID int64,
+) (*model.Dashboard, error) {
+
+	query := `
+	SELECT
+		IFNULL(SUM(amount),0),
+		COUNT(*),
+		IFNULL(AVG(amount),0),
+		IFNULL(MAX(amount),0)
+	FROM expenses
+	WHERE user_id = ?
+	`
+
+	dashboard := &model.Dashboard{}
+
+	err := r.db.QueryRowContext(
+		ctx,
+		query,
+		userID,
+	).Scan(
+		&dashboard.TotalExpenses,
+		&dashboard.TotalTransactions,
+		&dashboard.AverageExpense,
+		&dashboard.HighestExpense,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dashboard, nil
+}
+func (r *ExpenseRepository) CategorySummary(
+	ctx context.Context,
+	userID int64,
+) ([]model.CategorySummary, error) {
+
+	query := `
+	SELECT
+		category,
+		SUM(amount)
+	FROM expenses
+	WHERE user_id = ?
+	GROUP BY category
+	ORDER BY SUM(amount) DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []model.CategorySummary
+
+	for rows.Next() {
+
+		var summary model.CategorySummary
+
+		err := rows.Scan(
+			&summary.Category,
+			&summary.Amount,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, summary)
+	}
+
+	return result, nil
+}

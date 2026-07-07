@@ -105,3 +105,23 @@ func (s *ExpenseService) Delete(
 		expenseID,
 	)
 }
+func (s *ExpenseService) Dashboard(
+	ctx context.Context,
+	userID int64,
+) (*model.Dashboard, error) {
+
+	return s.expenseRepository.Dashboard(
+		ctx,
+		userID,
+	)
+}
+func (s *ExpenseService) CategorySummary(
+	ctx context.Context,
+	userID int64,
+) ([]model.CategorySummary, error) {
+
+	return s.expenseRepository.CategorySummary(
+		ctx,
+		userID,
+	)
+}

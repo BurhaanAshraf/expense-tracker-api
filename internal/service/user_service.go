@@ -50,12 +50,7 @@ func (s *UserService) Register(ctx context.Context, name, email, password string
 	return user, nil
 }
 
-func (s *UserService) Login(
-	ctx context.Context,
-	email,
-	password,
-	secret string,
-) (string, error) {
+func (s *UserService) Login(ctx context.Context, email, password string) (string, error) {
 	user, err := s.userRepository.FindByEmail(ctx, email)
 	if err != nil {
 		return "", errors.New("invalid email or password")
@@ -67,6 +62,9 @@ func (s *UserService) Login(
 	}
 
 	token, err := auth.GenerateToken(user.ID, s.jwtSecret)
+	if err != nil {
+		return "", err
+	}
 
 	return token, nil
 }

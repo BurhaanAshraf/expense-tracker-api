@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/BurhaanAshraf/finance-api/internal/dto"
 	"github.com/BurhaanAshraf/finance-api/internal/middleware"
+	"github.com/BurhaanAshraf/finance-api/internal/response"
 	"github.com/BurhaanAshraf/finance-api/internal/service"
 )
 
@@ -19,20 +21,12 @@ func NewExpenseHandler(expenseService *service.ExpenseService) *ExpenseHandler {
 	}
 }
 
-type CreateExpenseRequest struct {
-	Title       string  `json:"title"`
-	Amount      float64 `json:"amount"`
-	Category    string  `json:"category"`
-	ExpenseDate string  `json:"expense_date"`
-	Notes       string  `json:"notes"`
-}
-
 func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req CreateExpenseRequest
+	var req dto.CreateExpenseRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid request body")
 		return
 	}
 
@@ -49,14 +43,10 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, err.Error())
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	json.NewEncoder(w).Encode(expense)
+	response.Created(w, expense)
 }
 func (h *ExpenseHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(middleware.UserIDKey).(int64)
@@ -67,12 +57,11 @@ func (h *ExpenseHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.InternalServerError(w, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(expenses)
+	response.OK(w, expenses)
 }
 func (h *ExpenseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
@@ -80,7 +69,7 @@ func (h *ExpenseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	expenseID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid expense id", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid expense id")
 		return
 	}
 
@@ -93,12 +82,11 @@ func (h *ExpenseHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.NotFound(w, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(expense)
+	response.OK(w, expense)
 }
 func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 
@@ -106,15 +94,15 @@ func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	expenseID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid expense id", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid expense id")
 		return
 	}
 
-	var req CreateExpenseRequest
+	var req dto.CreateExpenseRequest
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid request body")
 		return
 	}
 
@@ -132,11 +120,13 @@ func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	response.OK(w, map[string]string{
+		"message": "Expense updated successfully",
+	})
 }
 func (h *ExpenseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
@@ -144,7 +134,7 @@ func (h *ExpenseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	expenseID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid expense id", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid expense id")
 		return
 	}
 
@@ -157,9 +147,43 @@ func (h *ExpenseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response.NoContent(w)
+}
+func (h *ExpenseHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Context().Value(middleware.UserIDKey).(int64)
+
+	dashboard, err := h.expenseService.Dashboard(
+		r.Context(),
+		userID,
+	)
+
+	if err != nil {
+		response.InternalServerError(w, err.Error())
+		return
+	}
+
+	response.OK(w, dashboard)
+}
+func (h *ExpenseHandler) CategorySummary(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Context().Value(middleware.UserIDKey).(int64)
+
+	summary, err := h.expenseService.CategorySummary(
+		r.Context(),
+		userID,
+	)
+
+	if err != nil {
+		response.InternalServerError(w, "Internal server error")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	response.OK(w, summary)
 }

@@ -41,6 +41,8 @@ func main() {
 	mux.Handle("GET /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.GetByID)))
 	mux.Handle("PUT /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.Update)))
 	mux.Handle("DELETE /expenses/{id}", jwtMiddlware(http.HandlerFunc(expenseHandler.Delete)))
+	mux.Handle("GET /dashboard", jwtMiddlware(http.HandlerFunc(expenseHandler.Dashboard)))
+	mux.Handle("GET /dashboard/categories", jwtMiddlware(http.HandlerFunc(expenseHandler.CategorySummary)))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
