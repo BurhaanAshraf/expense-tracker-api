@@ -44,3 +44,22 @@ func (s *UserService) Register(ctx context.Context, name, email, password string
 
 	return user, nil
 }
+
+func (s *UserService) Login(ctx context.Context, email, password string, secret string) (string, error) {
+	user, err := s.userRepository.FindByEmail(ctx, email)
+	if err != nil {
+		return "", errors.New("invalid email or password")
+	}
+
+	err = auth.CheckPassword(password, user.PasswordHash)
+	if err != nil {
+		return "", errors.New("invalid email or password")
+	}
+
+	token, err := auth.GenerateToken(user.ID, secret)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}

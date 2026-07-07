@@ -28,6 +28,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", handler.HealthHandler)
 	mux.HandleFunc("POST /register", authHandler.Register)
+	mux.HandleFunc("POST /login", authHandler.Login)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
