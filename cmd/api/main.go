@@ -27,11 +27,16 @@ func main() {
 	userService := service.NewUserService(userRepository, cfg.JWTSecret)
 	authHandler := handler.NewAuthHandler(userService)
 
+	expenseRepository := repository.NewExpenseRepository(db)
+	expenseService := service.NewExpenseService(expenseRepository)
+	expenseHandler := handler.NewExpenseHandler(expenseService)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", handler.HealthHandler)
 	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
 	mux.Handle("GET /me", jwtMiddlware(http.HandlerFunc(handler.Me)))
+	mux.Handle("POST /expenses", jwtMiddlware(http.HandlerFunc(expenseHandler.Create)))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.AppPort,
