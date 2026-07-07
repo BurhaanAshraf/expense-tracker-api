@@ -49,11 +49,35 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	response.Created(w, expense)
 }
 func (h *ExpenseHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+
 	userID := r.Context().Value(middleware.UserIDKey).(int64)
 
+	category := r.URL.Query().Get("category")
+
+	page := 1
+	limit := 10
+
+	if value := r.URL.Query().Get("page"); value != "" {
+		p, err := strconv.Atoi(value)
+		if err == nil {
+			page = p
+		}
+	}
+
+	if value := r.URL.Query().Get("limit"); value != "" {
+		l, err := strconv.Atoi(value)
+		if err == nil {
+			limit = l
+		}
+	}
+	sort := r.URL.Query().Get("sort")
 	expenses, err := h.expenseService.GetAll(
 		r.Context(),
 		userID,
+		category,
+		page,
+		limit,
+		sort,
 	)
 
 	if err != nil {

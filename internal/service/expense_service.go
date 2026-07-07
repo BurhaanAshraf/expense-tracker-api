@@ -51,8 +51,28 @@ func (s *ExpenseService) Create(
 func (s *ExpenseService) GetAll(
 	ctx context.Context,
 	userID int64,
+	category string,
+	page int,
+	limit int,
+	sort string,
 ) ([]model.Expense, error) {
-	return s.expenseRepository.GetAllByUserID(ctx, userID)
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	return s.expenseRepository.GetAll(
+		ctx,
+		userID,
+		category,
+		page,
+		limit,
+		sort,
+	)
 }
 func (s *ExpenseService) GetByID(
 	ctx context.Context,
