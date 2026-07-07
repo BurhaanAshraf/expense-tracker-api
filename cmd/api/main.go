@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/BurhaanAshraf/finance-api/internal/config"
 	"github.com/BurhaanAshraf/finance-api/internal/database"
@@ -21,7 +27,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository, cfg.JWTSecret)
@@ -50,12 +55,40 @@ func main() {
 		Handler: loggingMiddleware(mux),
 	}
 
-	log.Printf("%s started on http://localhost:%s", cfg.AppName, cfg.AppPort)
+	go func() {
+		log.Printf("%s started on http://localhost:%s", cfg.AppName, cfg.AppPort)
 
-	err = server.ListenAndServe()
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	}()
 
-	if err != nil {
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(
+		quit,
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+
+	<-quit
+
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		10*time.Second,
+	)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := db.Close(); err != nil {
+		log.Println("Error closing database:", err)
+	}
+
+	log.Println("Server stopped gracefully.")
 
 }
