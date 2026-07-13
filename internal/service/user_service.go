@@ -14,10 +14,7 @@ type UserService struct {
 	jwtSecret      string
 }
 
-func NewUserService(
-	userRepository *repository.UserRepository,
-	jwtSecret string,
-) *UserService {
+func NewUserService(userRepository *repository.UserRepository, jwtSecret string) *UserService {
 	return &UserService{
 		userRepository: userRepository,
 		jwtSecret:      jwtSecret,

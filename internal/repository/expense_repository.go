@@ -56,14 +56,7 @@ func (r *ExpenseRepository) Create(ctx context.Context, expense *model.Expense) 
 	return nil
 }
 
-func (r *ExpenseRepository) GetAll(
-	ctx context.Context,
-	userID int64,
-	category string,
-	page int,
-	limit int,
-	sort string,
-) ([]model.Expense, error) {
+func (r *ExpenseRepository) GetAll(ctx context.Context, userID int64, category string, page int, limit int, sort string) ([]model.Expense, error) {
 
 	offset := (page - 1) * limit
 	sortClause := getSortClause(sort)
@@ -163,11 +156,7 @@ func (r *ExpenseRepository) GetAll(
 
 	return expenses, nil
 }
-func (r *ExpenseRepository) GetByID(
-	ctx context.Context,
-	userID int64,
-	expenseID int64,
-) (*model.Expense, error) {
+func (r *ExpenseRepository) GetByID(ctx context.Context, userID int64, expenseID int64) (*model.Expense, error) {
 
 	query := `
 	SELECT
@@ -209,10 +198,7 @@ func (r *ExpenseRepository) GetByID(
 
 	return expense, nil
 }
-func (r *ExpenseRepository) Update(
-	ctx context.Context,
-	expense *model.Expense,
-) error {
+func (r *ExpenseRepository) Update(ctx context.Context, expense *model.Expense) error {
 
 	query := `
 	UPDATE expenses
@@ -239,11 +225,7 @@ func (r *ExpenseRepository) Update(
 
 	return err
 }
-func (r *ExpenseRepository) Delete(
-	ctx context.Context,
-	userID int64,
-	expenseID int64,
-) error {
+func (r *ExpenseRepository) Delete(ctx context.Context, userID int64, expenseID int64) error {
 
 	query := `
 	DELETE FROM expenses
@@ -259,10 +241,7 @@ func (r *ExpenseRepository) Delete(
 
 	return err
 }
-func (r *ExpenseRepository) Dashboard(
-	ctx context.Context,
-	userID int64,
-) (*model.Dashboard, error) {
+func (r *ExpenseRepository) Dashboard(ctx context.Context, userID int64) (*model.Dashboard, error) {
 
 	query := `
 	SELECT
@@ -293,10 +272,7 @@ func (r *ExpenseRepository) Dashboard(
 
 	return dashboard, nil
 }
-func (r *ExpenseRepository) CategorySummary(
-	ctx context.Context,
-	userID int64,
-) ([]model.CategorySummary, error) {
+func (r *ExpenseRepository) CategorySummary(ctx context.Context, userID int64) ([]model.CategorySummary, error) {
 
 	query := `
 	SELECT
