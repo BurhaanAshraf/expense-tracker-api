@@ -53,7 +53,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Email: user.Email,
 	}
 
-	response.Created(w, userResponse)
+	response.Created(
+		w,
+		"User registered successfully",
+		userResponse,
+	)
 }
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginRequest

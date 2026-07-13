@@ -26,8 +26,8 @@ func OK(w http.ResponseWriter, data interface{}) {
 	write(w, http.StatusOK, true, "", data)
 }
 
-func Created(w http.ResponseWriter, data interface{}) {
-	write(w, http.StatusCreated, true, "", data)
+func Created(w http.ResponseWriter, message string, data interface{}) {
+	write(w, http.StatusCreated, true, message, data)
 }
 
 func NoContent(w http.ResponseWriter) {

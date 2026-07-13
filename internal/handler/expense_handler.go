@@ -52,7 +52,13 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		response.BadRequest(w, err.Error())
 		return
 	}
-	response.Created(w, expense)
+	response.Created(
+		w,
+		"Expense created successfully",
+		dto.CreateExpenseResponse{
+			ID: expense.ID,
+		},
+	)
 }
 func (h *ExpenseHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
