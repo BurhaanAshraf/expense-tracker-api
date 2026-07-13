@@ -16,16 +16,7 @@ func NewExpenseService(expenseRepository *repository.ExpenseRepository) *Expense
 		expenseRepository: expenseRepository,
 	}
 }
-
-func (s *ExpenseService) Create(
-	ctx context.Context,
-	userID int64,
-	title string,
-	amount float64,
-	category string,
-	expenseDate string,
-	notes string,
-) (*model.Expense, error) {
+func (s *ExpenseService) Create(ctx context.Context, userID int64, title string, amount float64, category string, expenseDate string, notes string) (*model.Expense, error) {
 
 	date, err := ParseDate(expenseDate)
 	if err != nil {
@@ -48,14 +39,7 @@ func (s *ExpenseService) Create(
 
 	return expense, nil
 }
-func (s *ExpenseService) GetAll(
-	ctx context.Context,
-	userID int64,
-	category string,
-	page int,
-	limit int,
-	sort string,
-) ([]model.Expense, error) {
+func (s *ExpenseService) GetAll(ctx context.Context, userID int64, category string, page int, limit int, sort string) ([]model.Expense, error) {
 
 	if page <= 0 {
 		page = 1
@@ -74,27 +58,14 @@ func (s *ExpenseService) GetAll(
 		sort,
 	)
 }
-func (s *ExpenseService) GetByID(
-	ctx context.Context,
-	userID int64,
-	expenseID int64,
-) (*model.Expense, error) {
+func (s *ExpenseService) GetByID(ctx context.Context, userID int64, expenseID int64) (*model.Expense, error) {
 	return s.expenseRepository.GetByID(
 		ctx,
 		userID,
 		expenseID,
 	)
 }
-func (s *ExpenseService) Update(
-	ctx context.Context,
-	userID int64,
-	expenseID int64,
-	title string,
-	amount float64,
-	category string,
-	expenseDate string,
-	notes string,
-) error {
+func (s *ExpenseService) Update(ctx context.Context, userID int64, expenseID int64, title string, amount float64, category string, expenseDate string, notes string) error {
 
 	date, err := ParseDate(expenseDate)
 	if err != nil {
@@ -113,11 +84,7 @@ func (s *ExpenseService) Update(
 
 	return s.expenseRepository.Update(ctx, expense)
 }
-func (s *ExpenseService) Delete(
-	ctx context.Context,
-	userID int64,
-	expenseID int64,
-) error {
+func (s *ExpenseService) Delete(ctx context.Context, userID int64, expenseID int64) error {
 
 	return s.expenseRepository.Delete(
 		ctx,
@@ -125,20 +92,14 @@ func (s *ExpenseService) Delete(
 		expenseID,
 	)
 }
-func (s *ExpenseService) Dashboard(
-	ctx context.Context,
-	userID int64,
-) (*model.Dashboard, error) {
+func (s *ExpenseService) Dashboard(ctx context.Context, userID int64) (*model.Dashboard, error) {
 
 	return s.expenseRepository.Dashboard(
 		ctx,
 		userID,
 	)
 }
-func (s *ExpenseService) CategorySummary(
-	ctx context.Context,
-	userID int64,
-) ([]model.CategorySummary, error) {
+func (s *ExpenseService) CategorySummary(ctx context.Context, userID int64) ([]model.CategorySummary, error) {
 
 	return s.expenseRepository.CategorySummary(
 		ctx,
